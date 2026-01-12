@@ -1,0 +1,12 @@
+# Секреты (САМОЕ ВАЖНОЕ)
+.env
+
+# Временные файлы автоматизации
+workflows/creds_temp.json
+
+n8n_data/
+
+# Логи и временные файлы системы
+*.log
+.DS_Store
+Thumbs.db

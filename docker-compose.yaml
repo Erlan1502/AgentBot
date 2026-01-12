@@ -1,0 +1,26 @@
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n_worker
+    restart: always
+    ports:
+      - '5678:5678'
+    environment:
+      - WEBHOOK_URL=https://${DOMAIN}/
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/backup/workflows
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok_tunnel
+    restart: always
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command:
+      - 'http'
+      - 'n8n:5678'
+      - '--domain=${DOMAIN}'
+
+volumes:
+  n8n_data:

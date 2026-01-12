@@ -1,0 +1,225 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "7c6dee56-c563-4718-b2b4-82a45b47c23f",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [-352, -96],
+      "webhookId": "d29e6177-ada9-4754-8b3e-d94e70886f36",
+      "credentials": {
+        "telegramApi": {
+          "id": "MmR3XGCnGOVixvq7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "eeef7ae4-d627-4d77-b27e-b8a227788afd",
+      "name": "Telegram Send",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [896, -80],
+      "webhookId": "583256fe-fbe9-42e7-ac02-2650f5fc2132",
+      "credentials": {
+        "telegramApi": {
+          "id": "MmR3XGCnGOVixvq7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [304, 160],
+      "id": "b1e29b9b-4ade-4075-8837-5c145ac442ae",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "l0sQs1yjZVCBozzF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"photo\"].pop()[\"file_id\"] }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [128, -256],
+      "id": "656c92c1-06c0-4fc4-95c9-2e3eb06935f5",
+      "name": "Get a file",
+      "webhookId": "13d88a67-e842-484a-8f91-ed21289a67e2",
+      "credentials": {
+        "telegramApi": {
+          "id": "A8kuN0XDs5OUQTrD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "{{ $('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || \"Проанализируй фото\" }}",
+        "options": {
+          "systemMessage": "Ты менеджер по продажам веб-сайтов. Ты должен давать стоимость исходя из лендинга(фотографии, которые тебе скидывают). Используй расценки РФ.\nТвой ответ не должен превышать 2000 символов",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [352, -80],
+      "id": "91346406-1069-4dd4-a835-de527074abf7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [448, 176],
+      "id": "67672cf7-64ca-41e2-9ba1-e603a9da9320",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd80a52c-da91-459e-a53d-0073fe156afc",
+              "leftValue": "={{ !!$json.message.photo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e3eaf77b-15c0-49c3-8fa4-ced7b6f7c085",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-112, -96],
+      "id": "709feb60-8dde-44ec-acb5-ef00d4f0c9ab",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2cd7c881a48dbc6e116c14cb4a98a183b3687efec1b357ca611750019154e1c7"
+  }
+}

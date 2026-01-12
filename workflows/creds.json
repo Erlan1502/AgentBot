@@ -1,0 +1,18 @@
+[
+  {
+    "id": "A8kuN0XDs5OUQTrD",
+    "name": "Telegram account",
+    "type": "telegramApi",
+    "data": {
+      "accessToken": "${TELEGRAM_TOKEN}"
+    }
+  },
+  {
+    "id": "4oMtEJB39PEDB65U",
+    "name": "Google Gemini(PaLM) Api account",
+    "type": "googlePalmApi",
+    "data": {
+      "apiKey": "${GEMINI_API_KEY}"
+    }
+  }
+]
