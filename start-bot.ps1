@@ -22,7 +22,7 @@ Write-Host "Ожидаем готовности n8n (15 сек)..." -ForegroundC
 Start-Sleep -s 15
 
 # 4. ПОДСТАНОВКА КЛЮЧЕЙ ИЗ .env В ТЕМП-ФАЙЛ
-$creds = Get-Content "workflows/creds.json" -Raw
+$creds = Get-Content "workflows/creds.json" -Raw 
 # Загружаем переменную из .env (простой способ для PS)
 $envContent = Get-Content ".env" -Raw
 if ($envContent -match 'GEMINI_API_KEY=(.*)') {
@@ -39,4 +39,4 @@ docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.
 # Удаляем временный файл с открытым ключом
 if (Test-Path "workflows/creds_temp.json") { Remove-Item "workflows/creds_temp.json" }
 
-Write-Host "--- ALL READY! Alexey Lakota is online ---" -ForegroundColor Green
+Write-Host "--- ALL READY! Bot is online ---" -ForegroundColor Green

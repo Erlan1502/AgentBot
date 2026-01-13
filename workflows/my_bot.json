@@ -1,4 +1,6 @@
 {
+  "name": "My Agent Bot",
+  "active": false,
   "nodes": [
     {
       "parameters": {
