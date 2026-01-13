@@ -14,5 +14,11 @@
     "data": {
       "apiKey": "${GEMINI_API_KEY}"
     }
+  },
+  {
+    "id": "groq_api_id",
+    "name": "Groq (OpenAI format)",
+    "type": "openAiApi",
+    "data": { "apiKey": "${GROQ_API_KEY}" }
   }
 ]

@@ -25,13 +25,21 @@ Write-Host "Ozhidaem gotovnosti n8n (15 sek)..." -ForegroundColor Gray
 Start-Sleep -s 15
 
 # 4. PODSTANOVKA KLYUCHEJ IZ .env V TEMP-FAIL
+# Читаем файлы
 $creds = Get-Content "workflows/creds.json" -Raw 
 $envContent = Get-Content ".env" -Raw
-if ($envContent -match 'GEMINI_API_KEY=(.*)') {
-    $apiKey = $matches[1].Trim()
-    $creds = $creds.Replace('${GEMINI_API_KEY}', $apiKey)
-    $creds | Set-Content "workflows/creds_temp.json"
-}
+
+# Извлекаем все ключи из .env
+$tgToken = if ($envContent -match 'TELEGRAM_TOKEN=(.*)') { $matches[1].Trim() }
+$geminiKey = if ($envContent -match 'GEMINI_API_KEY=(.*)') { $matches[1].Trim() }
+
+# Выполняем замену всех переменных
+$creds = $creds.Replace('${TELEGRAM_TOKEN}', $tgToken)
+$creds = $creds.Replace('${GEMINI_API_KEY}', $geminiKey)
+
+# Сохраняем временный файл для импорта
+$creds | Set-Content "workflows/creds_temp.json"
+Write-Host "Ключи успешно подставлены в creds_temp.json" -ForegroundColor Green
 
 # 5. IMPORT
 Write-Host "--- Import dannih (Data Import) ---" -ForegroundColor Cyan
