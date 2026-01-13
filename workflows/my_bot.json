@@ -1,6 +1,7 @@
 {
   "name": "My Agent Bot",
   "active": false,
+  "versionId": 1,
   "nodes": [
     {
       "parameters": {
