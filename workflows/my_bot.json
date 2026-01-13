@@ -12,7 +12,7 @@
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1,
-      "position": [-640, -96],
+      "position": [-720, -80],
       "webhookId": "d29e6177-ada9-4754-8b3e-d94e70886f36",
       "credentials": {
         "telegramApi": {
@@ -33,7 +33,7 @@
       "name": "Telegram Send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [848, -80],
+      "position": [640, -176],
       "webhookId": "583256fe-fbe9-42e7-ac02-2650f5fc2132",
       "credentials": {
         "telegramApi": {
@@ -50,7 +50,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [-32, -256],
+      "position": [-48, -152],
       "id": "656c92c1-06c0-4fc4-95c9-2e3eb06935f5",
       "name": "Get a file",
       "webhookId": "13d88a67-e842-484a-8f91-ed21289a67e2",
@@ -72,7 +72,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [304, -80],
+      "position": [240, -80],
       "id": "91346406-1069-4dd4-a835-de527074abf7",
       "name": "AI Agent",
       "retryOnFail": true,
@@ -83,12 +83,12 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"] }}",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "contextWindowLength": 20
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [384, 96],
+      "position": [304, 144],
       "id": "67672cf7-64ca-41e2-9ba1-e603a9da9320",
       "name": "Simple Memory"
     },
@@ -129,7 +129,7 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [-416, -96],
+      "position": [-336, -80],
       "id": "709feb60-8dde-44ec-acb5-ef00d4f0c9ab",
       "name": "If"
     },
@@ -141,7 +141,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [848, 112],
+      "position": [640, 16],
       "id": "3208f4e2-3988-4dc9-bee7-303f1609d6de",
       "name": "Send a text message",
       "webhookId": "3b518c9c-e2fa-4be2-8664-3d825ad80fb5",
@@ -162,7 +162,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3,
-      "position": [528, 96],
+      "position": [432, 144],
       "id": "6d3a4b15-818f-4c71-a9cc-eee83e7e1700",
       "name": "Code Tool"
     },
@@ -179,7 +179,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [240, 96],
+      "position": [176, 144],
       "id": "1fb2be4b-9408-4100-aaa2-e13ff232621f",
       "name": "OpenAI Chat Model",
       "credentials": {
