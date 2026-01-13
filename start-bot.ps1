@@ -31,11 +31,11 @@ $envContent = Get-Content ".env" -Raw
 
 # Извлекаем все ключи из .env
 $tgToken = if ($envContent -match 'TELEGRAM_TOKEN=(.*)') { $matches[1].Trim() }
-$geminiKey = if ($envContent -match 'GEMINI_API_KEY=(.*)') { $matches[1].Trim() }
+$groqKey = if ($envContent -match 'GROQ_API_KEY=(.*)') { $matches[1].Trim() }
 
 # Выполняем замену всех переменных
 $creds = $creds.Replace('${TELEGRAM_TOKEN}', $tgToken)
-$creds = $creds.Replace('${GEMINI_API_KEY}', $geminiKey)
+$creds = $creds.Replace('${GROQ_API_KEY}', $groqKey)
 
 # Сохраняем временный файл для импорта
 $creds | Set-Content "workflows/creds_temp.json"
