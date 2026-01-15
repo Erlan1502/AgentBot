@@ -5,10 +5,6 @@ services:
     restart: always
     ports:
       - '5678:5678'
-    environment:
-      - WEBHOOK_URL=https://${DOMAIN}/
-      - N8N_BLOCK_TIMEOUT=300000
-      - N8N_NODES_EXECUTABLE_TIMEOUT=300000
     volumes:
       - n8n_data:/home/node/.n8n
       - ./workflows:/backup/workflows
