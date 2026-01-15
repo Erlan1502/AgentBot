@@ -32,10 +32,12 @@ $envContent = Get-Content ".env" -Raw
 # Извлекаем все ключи из .env
 $tgToken = if ($envContent -match 'TELEGRAM_TOKEN=(.*)') { $matches[1].Trim() }
 $groqKey = if ($envContent -match 'GROQ_API_KEY=(.*)') { $matches[1].Trim() }
+$geminiKey = if ($envContent -match 'GEMINI_API_KEY=(.*)') { $matches[1].Trim() }
 
 # Выполняем замену всех переменных
 $creds = $creds.Replace('${TELEGRAM_TOKEN}', $tgToken)
 $creds = $creds.Replace('${GROQ_API_KEY}', $groqKey)
+$creds = $creds.Replace('${GEMINI_API_KEY}', $geminiKey)
 
 # Сохраняем временный файл для импорта
 $creds | Set-Content "workflows/creds_temp.json"
@@ -47,7 +49,7 @@ docker exec -it n8n_worker n8n import:credentials --input /backup/workflows/cred
 docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.json
 
 Write-Host "Checking/Downloading Gemma 3 27b (this may take time)..." -ForegroundColor Yellow
-docker exec -it ollama ollama pull gemma3:27b-instruct-q4_K_M
+docker exec -it ollama ollama pull gemma3:27b-it-qat
 
 # Udalyaem vremennij fail
 if (Test-Path "workflows/creds_temp.json") { Remove-Item "workflows/creds_temp.json" }
