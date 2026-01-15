@@ -20,5 +20,13 @@
     "name": "Groq (OpenAI format)",
     "type": "openAiApi",
     "data": { "apiKey": "${GROQ_API_KEY}" }
+  },
+  {
+    "id": "ollama_local_id",
+    "name": "Local Ollama",
+    "type": "ollamaApi",
+    "data": {
+      "host": "http://ollama:11434"
+    }
   }
 ]
