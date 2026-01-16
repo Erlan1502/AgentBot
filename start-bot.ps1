@@ -48,8 +48,8 @@ Write-Host "--- Import dannih (Data Import) ---" -ForegroundColor Cyan
 docker exec -it n8n_worker n8n import:credentials --input /backup/workflows/creds_temp.json
 docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.json
 
-Write-Host "Checking/Downloading Gemma 3 27b (this may take time)..." -ForegroundColor Yellow
-docker exec -it ollama ollama pull gemma3:27b-it-qat
+Write-Host "Zagruzka modeli qwen2.5-vl:7b (Vision + Tools)..." -ForegroundColor Yellow
+docker exec -it ollama ollama pull qwen2.5-vl:7b
 
 # Udalyaem vremennij fail
 if (Test-Path "workflows/creds_temp.json") { Remove-Item "workflows/creds_temp.json" }

@@ -5,6 +5,9 @@ services:
     restart: always
     ports:
       - '5678:5678'
+    environment:
+      - N8N_EDITOR_BASE_URL=https://${DOMAIN}
+      - WEBHOOK_URL=https://${DOMAIN}/
     volumes:
       - n8n_data:/home/node/.n8n
       - ./workflows:/backup/workflows
