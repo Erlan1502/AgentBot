@@ -12,7 +12,7 @@
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1,
-      "position": [-720, -80],
+      "position": [-688, 32],
       "webhookId": "d29e6177-ada9-4754-8b3e-d94e70886f36",
       "credentials": {
         "telegramApi": {
@@ -33,7 +33,7 @@
       "name": "Telegram Send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [896, -240],
+      "position": [992, 32],
       "webhookId": "583256fe-fbe9-42e7-ac02-2650f5fc2132",
       "credentials": {
         "telegramApi": {
@@ -50,7 +50,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [-48, -160],
+      "position": [-16, -48],
       "id": "656c92c1-06c0-4fc4-95c9-2e3eb06935f5",
       "name": "Get a file",
       "webhookId": "13d88a67-e842-484a-8f91-ed21289a67e2",
@@ -66,30 +66,30 @@
         "promptType": "define",
         "text": "={{ $('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || \"Проанализируй фото\" }}",
         "options": {
-          "systemMessage": "Ты — опытный менеджер по имени Ерлан. Ты общаешься вежливо, по-деловому, но с легким дружелюбным оттенком.\n\nТВОЯ ЛОГИКА РАБОТЫ:\n\nЕсли пользователь пишет только текст (без фото):\n\nОтвечай как профессиональный консультант.\n\nМягко напомни, что для точной оценки стоимости тебе нужно увидеть макет или текущий дизайн (скриншот).\n\nЕсли пришло фото (скриншот макета):\n\nВизуальный аудит: Внимательно изучи изображение. Пересчитай все логические блоки: шапку (header), подвал (footer), меню, баннеры, карточки, формы и текстовые секции.\n\nОписание: Назови пользователю конкретные блоки, которые ты увидел, чтобы он понимал ход твоих мыслей.\n\nЗАПРЕТ НА САМОСТОЯТЕЛЬНЫЙ РАСЧЕТ: Никогда не называй стоимость в тексте своего сообщения. Твоя задача — только аудит блоков. Расчетом занимается отдельная система.\n\nТЕХНИЧЕСКИЙ ВЫВОД (ОБЯЗАТЕЛЬНО): В самом конце твоего сообщения, после всех слов, добавь техническую строку строго в формате: [DATA: blocks=X, discount=Y], где X — общее количество найденных блоков (число), а Y — процент скидки (число, если скидка не обсуждалась — пиши 0).\n\nПример твоего ответа на фото: \"Изучил ваш скриншот. Я вижу здесь следующие элементы: навигационную панель, главный баннер, блок с преимуществами и футер. Итого я насчитал 4 логических блока. Сейчас подготовлю расчет стоимости. [DATA: blocks=4, discount=0]\"",
+          "systemMessage": "Личность и стиль\nТы — профессиональный и доброжелательный менеджер студии развлечений по имени Ерлан. Твоя задача — консультировать клиентов по услугам и помогать им записываться на свободное время. Общайся вежливо, грамотно и по-деловому.\n\nТвои инструменты (Tools)\ncheck_availability: Используй его всегда, когда нужно узнать, какие часы свободны на конкретную дату. Аргумент: дата в формате YYYY-MM-DD.\n\ncreate_booking: Вызывай его только для финальной записи в базу данных, когда у тебя есть все 5 параметров: Имя, Телефон, Дата (YYYY-MM-DD), Время (HH:mm) и Название услуги.\n\nЛогика ведения диалога\n1. Консультация по услугам Если клиент интересуется, что у вас есть, предложи на выбор:\n\nДетский День Рождения (15 000 тенге)\n\nКвест \"Пираты Карибского моря\" (22 000 тенге)\n\nВзрослый Квиз \"Мозгобойня\" (18 000 тенге)\n\n2. Проверка свободного времени\n\nКак только клиент называет дату (даже если он еще не выбрал услугу), обязательно используй check_availability.\n\nЕсли время занято, вежливо сообщи об этом и предложи свободные «окна» на основе данных из инструмента.\n\nПереводи человеческие понятия времени («завтра», «в субботу», «в обед») в точные даты и часы.\n\n3. Сбор контактных данных\n\nПеред созданием бронирования убедись, что клиент оставил Имя и Номер телефона. Если данных нет — запроси их.\n\n4. Финализация бронирования\n\nКогда все данные собраны, вызови create_booking.\n\nОБЯЗАТЕЛЬНОЕ УСЛОВИЕ: После успешного вызова инструмента ты должен четко ответить пользователю: «Запись успешно создана! Я зафиксировал все данные в графике».\n\nПримечание: Эта фраза нужна для срабатывания фильтра и отправки данных в Google Sheets.\n\nТехнические правила\nНе выдумывай свободное время «из головы» — всегда проверяй через check_availability.\n\nЕсли клиент прислал фото — вежливо ответь, что ты менеджер по бронированию и работаешь только с записью на мероприятия, а фото анализировать не умеешь.\n\nНикогда не называй id записи пользователю, просто подтверждай факт успеха.",
           "maxIterations": 5,
           "passthroughBinaryImages": true
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [224, -64],
+      "position": [256, 48],
       "id": "91346406-1069-4dd4-a835-de527074abf7",
       "name": "AI Agent",
       "retryOnFail": true,
-      "waitBetweenTries": 3000,
+      "waitBetweenTries": 5000,
       "maxTries": 3,
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "sessionKey": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"] }}",
         "contextWindowLength": 20
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [384, 160],
+      "position": [192, 272],
       "id": "67672cf7-64ca-41e2-9ba1-e603a9da9320",
       "name": "Simple Memory"
     },
@@ -130,7 +130,7 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [-336, -80],
+      "position": [-304, 32],
       "id": "709feb60-8dde-44ec-acb5-ef00d4f0c9ab",
       "name": "If"
     },
@@ -142,7 +142,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [976, 144],
+      "position": [1008, 256],
       "id": "3208f4e2-3988-4dc9-bee7-303f1609d6de",
       "name": "Send a text message",
       "webhookId": "3b518c9c-e2fa-4be2-8664-3d825ad80fb5",
@@ -166,25 +166,226 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [208, 160],
+      "position": [-80, 272],
       "id": "7f7043a2-104e-42cb-bae1-e29b706861ef",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "ALS0rnZNTPJbEqYo",
+          "id": "G075CEBQmM5LcHFj",
           "name": "OpenAi account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Получаем текст из предыдущей ноды (AI Agent)\nconst text = $json.output || \"\";\n\n// Ищем нашу техническую строку [DATA: blocks=X, discount=Y]\nconst dataMatch = text.match(/\\[DATA: blocks=(\\d+), discount=(\\d+)\\]/i);\n\nif (dataMatch) {\n    const blocks = parseInt(dataMatch[1]);\n    const discount = parseInt(dataMatch[2]);\n    \n    // Логика расчета (5000 руб за блок)\n    const pricePerBlock = 5000;\n    const total = blocks * pricePerBlock;\n    const finalPrice = total * (1 - discount / 100);\n    \n    // Очищаем текст сообщения от технической вставки\n    const cleanText = text.replace(/\\[DATA: blocks=\\d+, discount=\\d+\\]/i, \"\").trim();\n    \n    // Формируем красивый ответ с расчетом\n    return {\n        output: cleanText + `\\n\\n<b>💰 Предварительный расчет:</b>\\nКоличество блоков: ${blocks}\\nИтоговая цена: <b>${finalPrice.toLocaleString('ru-RU')} руб.</b>`\n    };\n}\n\n// Если технической строки нет (просто общение), отдаем текст как есть\nreturn {\n    output: text\n};"
+        "descriptionType": "manual",
+        "toolDescription": "Используй этот инструмент, чтобы узнать занятые часы на конкретную дату. На вход подавай дату в формате YYYY-MM-DD. Возвращает список занятого времени. Если список пуст — весь день свободен.",
+        "operation": "executeQuery",
+        "query": "SELECT booking_time \nFROM bookings \nWHERE booking_date = $1 \nAND status = 'confirmed';",
+        "options": {
+          "queryReplacement": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query_Parameters', ``, 'string') }}"
+        }
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [624, -240],
-      "id": "9c856c5d-2204-4886-8689-11ed0b4c039c",
-      "name": "Code in JavaScript"
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [544, 272],
+      "id": "47a60083-3455-47d7-8ee1-2b5fe1c7ae2e",
+      "name": "check_availability",
+      "credentials": {
+        "postgres": {
+          "id": "z32qh6evbMzVTsHV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Используй этот инструмент только после того, как клиент подтвердил дату и время. Требуются: имя, телефон, дата (YYYY-MM-DD), время (HH:mm) и название услуги. Возвращает ID созданного бронирования.",
+        "operation": "executeQuery",
+        "query": "WITH found_service AS (\n  -- Ищем ID услуги по частичному совпадению названия\n  SELECT id, name FROM services \n  WHERE name ILIKE '%' || $5 || '%' \n  LIMIT 1\n)\nINSERT INTO bookings (client_name, client_phone, booking_date, booking_time, service_id, status)\nSELECT \n  $1, $2, $3, $4, \n  (SELECT id FROM found_service), \n  'confirmed'\nWHERE EXISTS (SELECT 1 FROM found_service) -- Вставляем только если услуга найдена\nAND NOT EXISTS (\n  -- Дополнительная проверка занятости слота прямо в момент вставки\n  SELECT 1 FROM bookings \n  WHERE booking_date = $3 \n  AND booking_time = $4 \n  AND status = 'confirmed'\n)\nRETURNING id, client_name, client_phone, booking_date, booking_time, (SELECT name FROM found_service) AS confirmed_service_name, status;\n\n",
+        "options": {
+          "queryReplacement": "={{ $fromAI('name') }},{{ $fromAI('phone') }},{{ $fromAI('date') }},{{ $fromAI('time') }},{{ $fromAI('service') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [400, 288],
+      "id": "03064b76-68a0-42a0-8554-f4ef001bb75a",
+      "name": "create_booking",
+      "credentials": {
+        "postgres": {
+          "id": "z32qh6evbMzVTsHV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- 1. Создание структуры (Прайс-лист и Записи)\nCREATE TABLE IF NOT EXISTS services (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(255) NOT NULL,\n    price INT NOT NULL\n);\n\nCREATE TABLE IF NOT EXISTS bookings (\n    id SERIAL PRIMARY KEY,\n    client_name VARCHAR(255),\n    client_phone VARCHAR(50),\n    booking_date DATE NOT NULL,\n    booking_time TIME NOT NULL,\n    service_id INT REFERENCES services(id),\n    status VARCHAR(50) DEFAULT 'confirmed'\n);\n\n-- 2. Заполнение прайс-листа (чтобы Ерлан знал цены)\nINSERT INTO services (name, price) VALUES \n('Детский День Рождения', 15000),\n('Квест Пираты Карибского моря', 22000),\n('Взрослый Квиз \"Мозгобойня\"', 18000)\nON CONFLICT DO NOTHING;\n\n-- 3. Моковые данные (Занятые слоты на завтра для проверки конфликтов)\nINSERT INTO bookings (client_name, booking_date, booking_time, service_id, status) VALUES \n('Мария', CURRENT_DATE + INTERVAL '1 day', '14:00:00', 1, 'confirmed'),\n('Алексей', CURRENT_DATE + INTERVAL '1 day', '18:00:00', 2, 'confirmed')\nON CONFLICT DO NOTHING;\n\nALTER TABLE bookings \nADD CONSTRAINT unique_booking_slot UNIQUE (booking_date, booking_time);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-704, 368],
+      "id": "6cd7b17d-7d53-46c6-99ff-134758c0d2f3",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "z32qh6evbMzVTsHV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XtM5nUs6774annXb3PmUpcJ2Fh_f2WbmNiR-3WLXPQA",
+          "mode": "list",
+          "cachedResultName": "Таблица бронирований",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XtM5nUs6774annXb3PmUpcJ2Fh_f2WbmNiR-3WLXPQA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XtM5nUs6774annXb3PmUpcJ2Fh_f2WbmNiR-3WLXPQA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Дата": "{{ $node[\"AI Agent\"].json[\"lastStep\"][\"output\"][\"booking_date\"] }}",
+            "Время": "{{ $node[\"AI Agent\"].json[\"lastStep\"][\"output\"][\"booking_time\"] }}",
+            "Имя": "{{ $node[\"Telegram Trigger\"].json[\"message\"][\"from\"][\"first_name\"] }}",
+            "Услуга": "{{ $node[\"AI Agent\"].json[\"lastStep\"][\"output\"][\"confirmed_service_name\"] }}",
+            "Телефон": "{{ $node[\"AI Agent\"].json[\"lastStep\"][\"output\"][\"client_phone\"] }}",
+            "Статус Записи": "{{ $node[\"AI Agent\"].json[\"lastStep\"][\"output\"][\"status\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Дата",
+              "displayName": "Дата",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Время",
+              "displayName": "Время",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Имя",
+              "displayName": "Имя",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Телефон",
+              "displayName": "Телефон",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Услуга",
+              "displayName": "Услуга",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Статус Записи",
+              "displayName": "Статус Записи",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [992, -144],
+      "id": "ad67a1c9-c8a0-478b-85a6-d236552abbb5",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "8yw7xwk24jSpGlex",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0629bdb8-4f35-48ad-b1e4-1779566a0b77",
+              "leftValue": "={{ !!$node[\"AI Agent\"].json[\"lastStep\"]?.[\"output\"]?.[\"id\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [720, -144],
+      "id": "a6ec9290-0ac8-485c-94ea-be4452f48a06",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [64, 304],
+      "id": "f9f2b7a3-b586-48af-9cd3-9509c1999cf8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4oMtEJB39PEDB65U",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "connections": {
@@ -214,7 +415,12 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Telegram Send",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter",
             "type": "main",
             "index": 0
           }
@@ -258,6 +464,42 @@
       ]
     },
     "OpenAI Chat Model": {
+      "ai_languageModel": [[]]
+    },
+    "check_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -267,22 +509,10 @@
           }
         ]
       ]
-    },
-    "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Telegram Send",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "pinData": {},
   "meta": {
-    "instanceId": "8d107733da58c5ac536259d4c4f14e1379c07b2be0b6c2590a5195547cfd8a12",
-    "templateCredsSetupCompleted": true
+    "instanceId": "8d107733da58c5ac536259d4c4f14e1379c07b2be0b6c2590a5195547cfd8a12"
   }
 }

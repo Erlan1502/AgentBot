@@ -25,21 +25,25 @@ Write-Host "Ozhidaem gotovnosti n8n (15 sek)..." -ForegroundColor Gray
 Start-Sleep -s 15
 
 # 4. PODSTANOVKA KLYUCHEJ IZ .env V TEMP-FAIL
-# Читаем файлы
+# Сначала читаем файлы!
 $creds = Get-Content "workflows/creds.json" -Raw 
 $envContent = Get-Content ".env" -Raw
 
-# Извлекаем все ключи из .env
+# Теперь извлекаем все ключи из .env
 $tgToken = if ($envContent -match 'TELEGRAM_TOKEN=(.*)') { $matches[1].Trim() }
 $groqKey = if ($envContent -match 'GROQ_API_KEY=(.*)') { $matches[1].Trim() }
 $geminiKey = if ($envContent -match 'GEMINI_API_KEY=(.*)') { $matches[1].Trim() }
+$googleEmail = if ($envContent -match 'GOOGLE_SERVICE_ACCOUNT_EMAIL=(.*)') { $matches[1].Trim() }
+$googleKey = if ($envContent -match 'GOOGLE_PRIVATE_KEY="(.*)"') { $matches[1].Trim() }
 
-# Выполняем замену всех переменных
+# Выполняем замену всех переменных в JSON
 $creds = $creds.Replace('${TELEGRAM_TOKEN}', $tgToken)
 $creds = $creds.Replace('${GROQ_API_KEY}', $groqKey)
 $creds = $creds.Replace('${GEMINI_API_KEY}', $geminiKey)
+$creds = $creds.Replace('${GOOGLE_SERVICE_ACCOUNT_EMAIL}', $googleEmail)
+$creds = $creds.Replace('${GOOGLE_PRIVATE_KEY}', $googleKey)
 
-# Сохраняем временный файл для импорта
+# Сохраняем временный файл
 $creds | Set-Content "workflows/creds_temp.json"
 Write-Host "Ключи успешно подставлены в creds_temp.json" -ForegroundColor Green
 
@@ -49,7 +53,7 @@ docker exec -it n8n_worker n8n import:credentials --input /backup/workflows/cred
 docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.json
 
 Write-Host "Zagruzka modeli QWEN 2.5 (Vision + Tools)..." -ForegroundColor Yellow
-docker exec -it ollama ollama pull qwen2.5vl:7b
+docker exec -it ollama ollama pull qwen2.5:7b
 
 # Udalyaem vremennij fail
 if (Test-Path "workflows/creds_temp.json") { Remove-Item "workflows/creds_temp.json" }

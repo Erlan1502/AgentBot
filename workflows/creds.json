@@ -28,5 +28,14 @@
     "data": {
       "host": "http://ollama:11434"
     }
+  },
+  {
+    "id": "google_sheets_id",
+    "name": "Google Sheets account",
+    "type": "googleSheetsServiceAccountApi",
+    "data": {
+      "email": "${GOOGLE_SERVICE_ACCOUNT_EMAIL}",
+      "privateKey": "${GOOGLE_PRIVATE_KEY}"
+    }
   }
 ]
