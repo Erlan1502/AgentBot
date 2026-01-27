@@ -52,7 +52,7 @@ Write-Host "--- Import dannih (Data Import) ---" -ForegroundColor Cyan
 docker exec -it n8n_worker n8n import:credentials --input /backup/workflows/creds_temp.json
 docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.json
 
-Write-Host "Zagruzka modeli QWEN 2.5 (Vision + Tools)..." -ForegroundColor Yellow
+Write-Host "Zagruzka modeli QWEN 2.5 (Tools)..." -ForegroundColor Yellow
 docker exec -it ollama ollama pull qwen2.5:7b
 
 # Udalyaem vremennij fail

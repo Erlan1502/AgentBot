@@ -24,6 +24,14 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     restart: always
+    # Пробрасываем порт из контейнера на твой компьютер
+    ports:
+      - '11434:11434'
+    environment:
+      # Позволяет Ollama принимать запросы не только изнутри себя, но и снаружи
+      - OLLAMA_HOST=0.0.0.0
+      # Разрешает подключения от сторонних интерфейсов (SillyTavern)
+      - OLLAMA_ORIGINS=*
     volumes:
       - ollama_storage:/root/.ollama
     deploy:
