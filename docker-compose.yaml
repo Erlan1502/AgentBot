@@ -20,17 +20,82 @@ services:
     depends_on:
       - postgres
 
+  # --- НОВЫЙ БЛОК: DIFY ---
+  dify-db:
+    image: postgres:15
+    container_name: dify_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=dify
+    volumes:
+      - [cite_start]dify_db_data:/var/lib/postgresql/data [cite: 1]
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  dify-api:
+    image: langgenius/dify-api:latest
+    container_name: dify_api
+    restart: always
+    environment:
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=dify-db
+      - DB_DATABASE=dify
+      - REDIS_HOST=redis
+      - CONSOLE_API_URL=http://localhost:5001
+      - CONSOLE_WEB_URL=http://localhost:8080
+      - SERVICE_API_URL=http://localhost:5001
+      - APP_API_URL=http://localhost:5001
+      - APP_WEB_URL=http://localhost:8080
+      # Настройка для подключения к твоей Ollama
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+    depends_on:
+      - dify-db
+      - redis
+      - ollama
+
+  dify-worker:
+    image: langgenius/dify-api:latest
+    container_name: dify_worker
+    restart: always
+    environment:
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=dify-db
+      - DB_DATABASE=dify
+      - REDIS_HOST=redis
+      - MODE=worker
+    depends_on:
+      - dify-api
+
+  dify-web:
+    image: langgenius/dify-web:latest
+    container_name: dify_web
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      - CONSOLE_API_URL=http://localhost:5001
+      - APP_API_URL=http://localhost:5001
+    depends_on:
+      - dify-api
+
+  # --- ТВОИ СУЩЕСТВУЮЩИЕ СЕРВИСЫ ---
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
     restart: always
-    # Пробрасываем порт из контейнера на твой компьютер
     ports:
       - '11434:11434'
     environment:
-      # Позволяет Ollama принимать запросы не только изнутри себя, но и снаружи
       - OLLAMA_HOST=0.0.0.0
-      # Разрешает подключения от сторонних интерфейсов (SillyTavern)
       - OLLAMA_ORIGINS=*
     volumes:
       - ollama_storage:/root/.ollama
@@ -52,6 +117,7 @@ services:
       - 'http'
       - 'n8n:5678'
       - '--domain=${DOMAIN}'
+
   postgres:
     image: postgres:15
     container_name: postgres_db
@@ -63,8 +129,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - [cite_start]'5432:5432' [cite: 1]
+
 volumes:
   n8n_data:
   ollama_storage:
   postgres_data:
+  dify_db_data:
+  redis_data:
