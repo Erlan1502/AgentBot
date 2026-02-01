@@ -30,7 +30,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=dify
     volumes:
-      - [cite_start]dify_db_data:/var/lib/postgresql/data [cite: 1]
+      - dify_db_data:/var/lib/postgresql/data
 
   redis:
     image: redis:6-alpine
@@ -40,54 +40,85 @@ services:
       - redis_data:/data
 
   dify-api:
-    image: langgenius/dify-api:latest
+    image: langgenius/dify-api:0.12.1
     container_name: dify_api
     restart: always
     environment:
+      - MODE=api
+      - SECRET_KEY=sk-777-studio-project-unique-key-12345
       - DB_USERNAME=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=dify-db
       - DB_DATABASE=dify
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # Настройка очередей через Redis
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - BROKER_URL=redis://redis:6379/1
+      # Хранилище
+      - STORAGE_TYPE=local
+      - STORAGE_LOCAL_PATH=storage
+      # Ссылки для браузера
       - CONSOLE_API_URL=http://localhost:5001
       - CONSOLE_WEB_URL=http://localhost:8080
       - SERVICE_API_URL=http://localhost:5001
       - APP_API_URL=http://localhost:5001
       - APP_WEB_URL=http://localhost:8080
-      # Настройка для подключения к твоей Ollama
       - OLLAMA_API_BASE_URL=http://ollama:11434
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./dify/storage:/app/api/storage
     depends_on:
       - dify-db
       - redis
       - ollama
 
   dify-worker:
-    image: langgenius/dify-api:latest
+    image: langgenius/dify-api:0.12.1
     container_name: dify_worker
     restart: always
     environment:
+      - MODE=worker
+      - SECRET_KEY=sk-777-studio-project-unique-key-12345
       - DB_USERNAME=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=dify-db
       - DB_DATABASE=dify
       - REDIS_HOST=redis
-      - MODE=worker
+      - REDIS_PORT=6379
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - BROKER_URL=redis://redis:6379/1
+      - STORAGE_TYPE=local
+      - STORAGE_LOCAL_PATH=storage
+    volumes:
+      - ./dify/storage:/app/api/storage
     depends_on:
       - dify-api
 
   dify-web:
-    image: langgenius/dify-web:latest
+    image: langgenius/dify-web:0.12.1 # Фиксируем стабильную версию вместо latest
     container_name: dify_web
     restart: always
     ports:
-      - '8080:80'
+      - '8080:3000'
     environment:
-      - CONSOLE_API_URL=http://localhost:5001
-      - APP_API_URL=http://localhost:5001
+      # Настройки для браузера (клиентская часть)
+      - CONSOLE_API_URL=http://127.0.0.1:5001
+      - APP_API_URL=http://127.0.0.1:5001
+      # Настройки для сервера (внутренняя часть Docker)
+      - DIFY_API_URL=http://dify-api:5001
+      # Локализация (исправляет ошибку 't')
+      - LOCALE_CONF=ru-RU
+      - I18N_DEFAULT_LANGUAGE=ru-RU
+      # Базовые настройки
+      - NODE_ENV=production
+      - NEXT_PUBLIC_DEPLOY_ENV=PRODUCTION
     depends_on:
       - dify-api
 
-  # --- ТВОИ СУЩЕСТВУЮЩИЕ СЕРВИСЫ ---
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
@@ -129,7 +160,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - [cite_start]'5432:5432' [cite: 1]
+      - '5432:5432'
 
 volumes:
   n8n_data:
