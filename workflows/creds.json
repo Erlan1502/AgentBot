@@ -37,5 +37,14 @@
       "email": "${GOOGLE_SERVICE_ACCOUNT_EMAIL}",
       "privateKey": "${GOOGLE_PRIVATE_KEY}"
     }
+  },
+  {
+    "id": "ln3A6lgcD97eEqD9",
+    "name": "Header Auth account",
+    "type": "httpHeaderAuth",
+    "data": {
+      "name": "Authorization",
+      "value": "Bearer ${DIFY_API_KEY}"
+    }
   }
 ]

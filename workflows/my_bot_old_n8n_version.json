@@ -12,7 +12,7 @@
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1,
-      "position": [-864, -112],
+      "position": [-880, -32],
       "webhookId": "d29e6177-ada9-4754-8b3e-d94e70886f36",
       "credentials": {
         "telegramApi": {
@@ -24,14 +24,16 @@
     {
       "parameters": {
         "chatId": "={{ $(\"Telegram Trigger\").first().json.message.chat.id }}",
-        "text": "={{ $json.answer }}",
-        "additionalFields": {}
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
       },
       "id": "eeef7ae4-d627-4d77-b27e-b8a227788afd",
       "name": "Telegram Send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [-128, -208],
+      "position": [800, -32],
       "webhookId": "583256fe-fbe9-42e7-ac02-2650f5fc2132",
       "credentials": {
         "telegramApi": {
@@ -42,13 +44,105 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $(\"Telegram Trigger\").first().json.message.from.id }}",
-        "text": "К сожалению сервис в данный момент не работает, попробуйте позже...",
+        "resource": "file",
+        "fileId": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"photo\"].pop()[\"file_id\"] }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [-128, -16],
+      "position": [-208, -112],
+      "id": "656c92c1-06c0-4fc4-95c9-2e3eb06935f5",
+      "name": "Get a file",
+      "webhookId": "13d88a67-e842-484a-8f91-ed21289a67e2",
+      "credentials": {
+        "telegramApi": {
+          "id": "A8kuN0XDs5OUQTrD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Telegram Trigger\").first().json.message?.text || $(\"Telegram Trigger\").first().json.message?.caption || \"Проанализируй фото\" }}",
+        "options": {
+          "systemMessage": "=# РОЛЬ\nТы — Ерлан, вежливый и внимательный менеджер студии развлечений.\n\n# ПЕРСОНАЛИЗАЦИЯ (ИМЯ КЛИЕНТА)\n1. Твое имя по умолчанию для клиента: {{ $node[\"Telegram Trigger\"].json[\"message\"][\"from\"][\"first_name\"] }}.\n2. ВНИМАНИЕ: Если клиент просит называть его иначе (например, \"Зови меня Виталий Сергеевич\"), ты ОБЯЗАН запомнить это и использовать новое имя до конца диалога. \n3. Всегда отдавай приоритет тому имени, которым представился сам человек в истории переписки.\n\n# ТВОЙ ЖЕСТКИЙ ФИЛЬТР ВЫВОДА (КРИТИЧЕСКИ)\n- Тебе КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО писать технические теги: CallCheckAvailability, create_booking, JSON, {}, [], \"input\", \"id\".\n- Клиент не должен видеть твои \"мысли\" или названия инструментов. Только чистая русская речь.\n\n# ДАННЫЕ\n- Сегодня: {{ $now.setZone('Asia/Almaty').format('YYYY-MM-DD') }}\n- Услуги: Детский День Рождения (15к), Квест Пираты Карибского моря (22к), Квиз Мозгобойня (18к).\n\n# АЛГОРИТМ ДЕЙСТВИЙ\n1. ЗНАКОМСТВО: Если клиент говорит \"Зови меня [Имя]\", подтверди это вежливо: \"Принято, [Имя]! Чем могу помочь?\".\n2. ПРОВЕРКА МЕСТ: Если просят дату/время — молча вызывай check_availability.\n   - Если список не пуст — время занято. Предложи альтернативу.\n3. БРОНИРОВАНИЕ: Если есть все данные (Имя, Телефон, Услуга, Время) — вызывай create_booking.\n   - Используй только официальные названия услуг из списка.\n   - После получения ID подтверди запись: \"Запись успешно создана! Я зафиксировал все данные\".\n\n# ПРАВИЛА ОБЩЕНИЯ\n- Не ври. Если инструмент не выдал данных — не подтверждай запись.\n- Если клиент меняет имя в процессе — сразу переходи на новое обращение.",
+          "maxIterations": 10,
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [64, -16],
+      "id": "91346406-1069-4dd4-a835-de527074abf7",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $(\"Telegram Trigger\").first().json.message.chat.id.toString() + \"v28\" }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [16, 208],
+      "id": "67672cf7-64ca-41e2-9ba1-e603a9da9320",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd80a52c-da91-459e-a53d-0073fe156afc",
+              "leftValue": "={{ !!$json.message.photo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e3eaf77b-15c0-49c3-8fa4-ced7b6f7c085",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-496, -32],
+      "id": "709feb60-8dde-44ec-acb5-ef00d4f0c9ab",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Telegram Trigger\").first().json.message.from.id }}",
+        "text": "Ну ты и Dodig, чё то не так явно, смотри внимательно",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [800, 160],
       "id": "3208f4e2-3988-4dc9-bee7-303f1609d6de",
       "name": "Send a text message",
       "webhookId": "3b518c9c-e2fa-4be2-8664-3d825ad80fb5",
@@ -61,13 +155,80 @@
     },
     {
       "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen2.5:7b",
+          "mode": "list",
+          "cachedResultName": "qwen2.5:7b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-304, 208],
+      "id": "7f7043a2-104e-42cb-bae1-e29b706861ef",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "G075CEBQmM5LcHFj",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Используй этот инструмент, чтобы узнать занятые часы на конкретную дату. На вход подавай дату в формате YYYY-MM-DD. Возвращает список занятого времени. Если список пуст — весь день свободен.",
+        "operation": "executeQuery",
+        "query": "SELECT booking_time \nFROM bookings \nWHERE booking_date = $1 \nAND status = 'confirmed';",
+        "options": {
+          "queryReplacement": "=={{ [$fromAI('date', 'Дата в формате YYYY-MM-DD')] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [368, 208],
+      "id": "47a60083-3455-47d7-8ee1-2b5fe1c7ae2e",
+      "name": "check_availability",
+      "credentials": {
+        "postgres": {
+          "id": "z32qh6evbMzVTsHV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "КРИТИЧЕСКИЙ ИНСТРУМЕНТ: Вызови его немедленно, как только клиент подтвердил готовность записаться на свободное время. Требуются 5 параметров: имя, телефон, дата (YYYY-MM-DD), время (HH:mm) и полное название услуги. Ты ОБЯЗАН запустить этот инструмент технически, чтобы создать запись в базе данных. НЕ ПИШИ текст вызова в чат — система должна сработать в фоновом режиме",
+        "operation": "executeQuery",
+        "query": "WITH found_service AS (\n  SELECT id, name FROM services \n  WHERE name ILIKE '%Пират%' \n     OR name ILIKE '%' || $5 || '%'\n  LIMIT 1\n),\ninserted AS (\n  INSERT INTO bookings (client_name, client_phone, booking_date, booking_time, service_id, status)\n  SELECT \n    $1, $2, $3::DATE, $4::TIME, \n    (SELECT id FROM found_service), \n    'confirmed'\n  WHERE $5 IS NOT NULL \n  AND EXISTS (SELECT 1 FROM found_service)\n  AND NOT EXISTS (\n    SELECT 1 FROM bookings \n    WHERE booking_date = $3::DATE \n    AND booking_time = $4::TIME \n    AND status = 'confirmed'\n  )\n  RETURNING id, client_name, client_phone, booking_date, booking_time, (SELECT name FROM found_service) AS confirmed_service_name, status\n)\nSELECT * FROM inserted\nUNION ALL\nSELECT NULL, NULL, NULL, NULL, NULL, NULL, 'ERROR_SLOT_BUSY' \nWHERE NOT EXISTS (SELECT 1 FROM inserted) \nAND EXISTS (SELECT 1 FROM bookings WHERE booking_date = $3::DATE AND booking_time = $4::TIME AND status = 'confirmed')\nUNION ALL\nSELECT NULL, NULL, NULL, NULL, NULL, NULL, 'ERROR_SERVICE_NOT_FOUND' \nWHERE NOT EXISTS (SELECT 1 FROM inserted)\nAND (NOT EXISTS (SELECT 1 FROM found_service) OR $5 IS NULL);",
+        "options": {
+          "queryReplacement": "={{ [\n  $fromAI('name') || null, \n  $fromAI('phone') || null, \n  $fromAI('date') || null, \n  $fromAI('time') || null, \n  $fromAI('service') || null\n] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [208, 208],
+      "id": "03064b76-68a0-42a0-8554-f4ef001bb75a",
+      "name": "create_booking",
+      "credentials": {
+        "postgres": {
+          "id": "z32qh6evbMzVTsHV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "operation": "executeQuery",
         "query": "-- 1. Создание структуры (Прайс-лист и Записи)\nCREATE TABLE IF NOT EXISTS services (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(255) NOT NULL,\n    price INT NOT NULL\n);\n\nCREATE TABLE IF NOT EXISTS bookings (\n    id SERIAL PRIMARY KEY,\n    client_name VARCHAR(255),\n    client_phone VARCHAR(50),\n    booking_date DATE NOT NULL,\n    booking_time TIME NOT NULL,\n    service_id INT REFERENCES services(id),\n    status VARCHAR(50) DEFAULT 'confirmed'\n);\n\n-- 2. Заполнение прайс-листа (чтобы Ерлан знал цены)\nINSERT INTO services (name, price) VALUES \n('Детский День Рождения', 15000),\n('Квест Пираты Карибского моря', 22000),\n('Взрослый Квиз \"Мозгобойня\"', 18000)\nON CONFLICT DO NOTHING;\n\n-- 3. Моковые данные (Занятые слоты на завтра для проверки конфликтов)\nINSERT INTO bookings (client_name, booking_date, booking_time, service_id, status) VALUES \n('Мария', CURRENT_DATE + INTERVAL '1 day', '14:00:00', 1, 'confirmed'),\n('Алексей', CURRENT_DATE + INTERVAL '1 day', '18:00:00', 2, 'confirmed')\nON CONFLICT DO NOTHING;\n\nALTER TABLE bookings \nADD CONSTRAINT unique_booking_slot UNIQUE (booking_date, booking_time);",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [32, -352],
+      "position": [-896, 304],
       "id": "6cd7b17d-7d53-46c6-99ff-134758c0d2f3",
       "name": "Execute a SQL query",
       "credentials": {
@@ -169,7 +330,7 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [128, 192],
+      "position": [720, -192],
       "id": "ad67a1c9-c8a0-478b-85a6-d236552abbb5",
       "name": "Append row in sheet",
       "credentials": {
@@ -206,9 +367,25 @@
       },
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
-      "position": [-256, 192],
+      "position": [336, -192],
       "id": "a6ec9290-0ac8-485c-94ea-be4452f48a06",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-144, 208],
+      "id": "f9f2b7a3-b586-48af-9cd3-9509c1999cf8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4oMtEJB39PEDB65U",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
@@ -220,7 +397,7 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [-64, 192],
+      "position": [528, -192],
       "id": "027d84e8-f9a3-42af-b64f-a7144387e555",
       "name": "Execute a SQL query1",
       "credentials": {
@@ -238,7 +415,7 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [272, -368],
+      "position": [256, -368],
       "id": "a9504531-d558-48e7-b428-eb8732dc1c49",
       "name": "Execute a SQL query2",
       "credentials": {
@@ -258,7 +435,7 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [-496, -480],
+      "position": [-464, -480],
       "id": "8db309b1-edb3-4d7e-866d-4eb898bb3f17",
       "name": "Execute a SQL delete booking",
       "credentials": {
@@ -274,19 +451,19 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-688, -480],
+      "position": [-656, -480],
       "id": "efcf5fe5-aad5-4006-b61f-36517967a43e",
       "name": "Code in JavaScript"
     },
     {
       "parameters": {
-        "chatId": "={{ $json.callback_query.message.chat.id }}",
+        "chatId": "={{ $(\"Telegram Trigger\").first().json.message.chat.id }}",
         "text": "=«Ваша запись успешно отменена»",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [-304, -480],
+      "position": [-272, -480],
       "id": "e485e901-9cb4-4524-ab20-7c7b8761f1a9",
       "name": "Send a text deleting",
       "webhookId": "9bd65dc0-a412-4f7b-9004-30f3706ad1fe",
@@ -324,7 +501,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [320, 192],
+      "position": [912, -192],
       "id": "3a0c782d-52b9-442d-a02d-8d7650b2786b",
       "name": "Send a text information",
       "webhookId": "9bd65dc0-a412-4f7b-9004-30f3706ad1fe",
@@ -342,7 +519,7 @@
       },
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
-      "position": [-864, -480],
+      "position": [-832, -480],
       "id": "7e04bae0-0f3c-4926-8770-81273b310571",
       "name": "Telegram Trigger On DELETE",
       "webhookId": "263b1177-ee77-41b0-bba8-ec6fa5ccabb6",
@@ -361,146 +538,9 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [528, -352],
+      "position": [560, -464],
       "id": "b3c8c7a5-9e72-48ed-8841-037a0dd14880",
       "name": "Execute a SQL query3",
-      "credentials": {
-        "postgres": {
-          "id": "z32qh6evbMzVTsHV",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "dify-booking",
-        "responseMode": "lastNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [-864, 320],
-      "id": "3c904675-e0ab-4a67-a4f0-b33cf008708b",
-      "name": "Webhook",
-      "webhookId": "a66bb83e-a07e-4082-8e86-654f1e28c933"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://dify-api:5001/v1/chat-messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"inputs\": {},\n  \"query\": \"={{ $json.message.text }}\",\n  \"response_mode\": \"blocking\",\n  \"user\": \"{{ $json.message.from.id.toString() }}\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [-384, -112],
-      "id": "e096f42f-c9af-4fb2-8070-435fe996370f",
-      "name": "HTTP Request",
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "ln3A6lgcD97eEqD9",
-          "name": "Header Auth account"
-        }
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.action }}",
-                    "rightValue": "create_booking",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "id": "0a2cd514-cbe4-4610-99e3-62a0d3d7dc8f"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "ee169a42-e110-40ca-a682-0c75f134ebd0",
-                    "leftValue": "={{ $json.body.action }}",
-                    "rightValue": "check_availability",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [-704, 320],
-      "id": "7869dff4-27c2-46ee-87e6-70db572badea",
-      "name": "Switch"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH found_service AS (\n  SELECT id, name FROM services \n  WHERE name ILIKE '%Пират%' \n     OR name ILIKE '%' || $5 || '%'\n  LIMIT 1\n),\ninserted AS (\n  INSERT INTO bookings (client_name, client_phone, booking_date, booking_time, service_id, status)\n  SELECT \n    $1, $2, $3::DATE, $4::TIME, \n    (SELECT id FROM found_service), \n    'confirmed'\n  WHERE $5 IS NOT NULL \n  AND EXISTS (SELECT 1 FROM found_service)\n  AND NOT EXISTS (\n    SELECT 1 FROM bookings \n    WHERE booking_date = $3::DATE \n    AND booking_time = $4::TIME \n    AND status = 'confirmed'\n  )\n  RETURNING id, client_name, client_phone, booking_date, booking_time, (SELECT name FROM found_service) AS confirmed_service_name, status\n)\nSELECT * FROM inserted\nUNION ALL\nSELECT NULL, NULL, NULL, NULL, NULL, NULL, 'ERROR_SLOT_BUSY' \nWHERE NOT EXISTS (SELECT 1 FROM inserted) \nAND EXISTS (SELECT 1 FROM bookings WHERE booking_date = $3::DATE AND booking_time = $4::TIME AND status = 'confirmed')\nUNION ALL\nSELECT NULL, NULL, NULL, NULL, NULL, NULL, 'ERROR_SERVICE_NOT_FOUND' \nWHERE NOT EXISTS (SELECT 1 FROM inserted)\nAND (NOT EXISTS (SELECT 1 FROM found_service) OR $5 IS NULL);",
-        "options": {
-          "queryReplacement": "=={{ [$json.body.name, $json.body.phone, $json.body.date, $json.body.time, $json.body.service] }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [-480, 192],
-      "id": "bb1a9192-1ab5-4627-a091-fc612327179b",
-      "name": "create_booking",
-      "credentials": {
-        "postgres": {
-          "id": "z32qh6evbMzVTsHV",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT booking_time \nFROM bookings \nWHERE booking_date = $1 \nAND status = 'confirmed';",
-        "options": {
-          "queryReplacement": "=={{ [$json.body.date] }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [-480, 432],
-      "id": "1aca8397-1ed3-4d53-bf36-67aad9eceb5d",
-      "name": "check_availability",
       "credentials": {
         "postgres": {
           "id": "z32qh6evbMzVTsHV",
@@ -514,8 +554,104 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "If",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -542,6 +678,9 @@
           }
         ]
       ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [[]]
     },
     "Execute a SQL query1": {
       "main": [
@@ -584,64 +723,6 @@
         [
           {
             "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Switch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request": {
-      "main": [
-        [
-          {
-            "node": "Telegram Send",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Switch": {
-      "main": [
-        [
-          {
-            "node": "create_booking",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "check_availability",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "create_booking": {
-      "main": [
-        [
-          {
-            "node": "Filter",
             "type": "main",
             "index": 0
           }
