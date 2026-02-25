@@ -53,7 +53,7 @@ docker exec -it n8n_worker n8n import:credentials --input /backup/workflows/cred
 docker exec -it n8n_worker n8n import:workflow --input /backup/workflows/my_bot.json
 
 Write-Host "Zagruzka modeli Gemma3..." -ForegroundColor Yellow
-docker exec -it ollama ollama pull gemma3:12b-it-qat
+docker exec -it ollama ollama run qwen2.5:14b
 
 # Udalyaem vremennij fail
 if (Test-Path "workflows/creds_temp.json") { Remove-Item "workflows/creds_temp.json" }

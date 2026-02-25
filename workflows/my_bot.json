@@ -6,7 +6,10 @@
     {
       "parameters": {
         "updates": ["message"],
-        "additionalFields": {}
+        "additionalFields": {
+          "download": true,
+          "imageSize": "large"
+        }
       },
       "id": "7c6dee56-c563-4718-b2b4-82a45b47c23f",
       "name": "Telegram Trigger",
@@ -14,6 +17,10 @@
       "typeVersion": 1,
       "position": [-864, -112],
       "webhookId": "d29e6177-ada9-4754-8b3e-d94e70886f36",
+      "notesInFlow": false,
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": false,
       "credentials": {
         "telegramApi": {
           "id": "A8kuN0XDs5OUQTrD",
@@ -31,7 +38,7 @@
       "name": "Telegram Send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [-128, -208],
+      "position": [160, -208],
       "webhookId": "583256fe-fbe9-42e7-ac02-2650f5fc2132",
       "credentials": {
         "telegramApi": {
@@ -48,7 +55,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [-128, -16],
+      "position": [176, -16],
       "id": "3208f4e2-3988-4dc9-bee7-303f1609d6de",
       "name": "Send a text message",
       "webhookId": "3b518c9c-e2fa-4be2-8664-3d825ad80fb5",
@@ -238,7 +245,7 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [272, -368],
+      "position": [272, -352],
       "id": "a9504531-d558-48e7-b428-eb8732dc1c49",
       "name": "Execute a SQL query2",
       "credentials": {
@@ -351,7 +358,8 @@
           "id": "A8kuN0XDs5OUQTrD",
           "name": "Telegram account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -393,8 +401,15 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"inputs\": {},\n  \"query\": \"={{ $json.message.text }}\",\n  \"response_mode\": \"blocking\",\n  \"user\": \"{{ $json.message.from.id.toString() }}\"\n}",
-        "options": {}
+        "jsonBody": "={\n  \"inputs\": {},\n  \"query\": \"{{ $json.message.text }}\",\n  \"response_mode\": \"streaming\",\n  \"user\": \"{{ $json.message.from.id.toString() }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 60000
+        }
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
@@ -507,6 +522,16 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Получаем сырой ответ от Dify\nconst rawData = items[0].json.data; \n\n// Dify присылает данные потоком, разделяя их \"data: \"\n// Нам нужно собрать все кусочки \"answer\" воедино.\n\nlet fullText = \"\";\n\nif (typeof rawData === 'string') {\n    const lines = rawData.split('\\n');\n    \n    for (const line of lines) {\n        // Ищем строки, начинающиеся с \"data: \"\n        if (line.trim().startsWith('data:')) {\n            try {\n                // Убираем \"data: \" и парсим JSON\n                const jsonStr = line.replace('data: ', '').trim();\n                const jsonObj = JSON.parse(jsonStr);\n                \n                // Если это событие \"message\" или \"agent_message\", берем текст\n                if (jsonObj.event === 'message' || jsonObj.event === 'agent_message') {\n                    fullText += jsonObj.answer;\n                }\n            } catch (e) {\n                // Игнорируем строки, которые не являются JSON (например, пинги)\n            }\n        }\n    }\n}\n\n// Если вдруг Dify ответил обычным JSON (маловероятно, но бывает)\nif (!fullText && typeof rawData === 'object' && rawData.answer) {\n  fullText = rawData.answer;\n}\n\n// Возвращаем чистый текст для следующего узла\nreturn {\n  json: {\n    answer: fullText || \"Агент думал, но ничего не ответил.\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-112, -208],
+      "id": "6f1aaaf1-c9d1-4948-9c08-ecf69db9f8b3",
+      "name": "Code in JavaScript1"
     }
   ],
   "connections": {
@@ -605,7 +630,7 @@
       "main": [
         [
           {
-            "node": "Telegram Send",
+            "node": "Code in JavaScript1",
             "type": "main",
             "index": 0
           }
@@ -642,6 +667,17 @@
         [
           {
             "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send",
             "type": "main",
             "index": 0
           }
